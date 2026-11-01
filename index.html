@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrimonial Bureau Management Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        deepblue: {
+                            DEFAULT: '#1A5276',
+                            50: '#F2F7FA',
+                            100: '#E4EFF5',
+                            500: '#2471A3',
+                            600: '#1A5276',
+                            700: '#154360',
+                            800: '#11344B',
+                            900: '#0B2333',
+                        },
+                        lightblue: {
+                            DEFAULT: '#D6EAF8',
+                            50: '#F5F9FD',
+                            100: '#EBF4FA',
+                            200: '#D6EAF8',
+                            300: '#AED6F1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Reports & Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(26,82,118,0.2); border-radius: 4px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 h-full flex flex-col transition-colors duration-200 overflow-x-hidden">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="bg-deepblue-600 dark:bg-deepblue-900 text-white sticky top-0 z-40 shadow-md flex-none">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button id="mobile-sidebar-toggle" class="md:hidden text-white hover:text-lightblue p-2 rounded-lg focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-inner">
+                        <i class="fa-solid fa-rings-wedding text-lightblue text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight tracking-wide">Eternal Bond</h1>
+                        <p class="text-xs text-lightblue-200">Matrimonial Bureau Portal</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions & Profile -->
+            <div class="flex items-center gap-3">
+                <!-- Search Quick Button -->
+                <div class="hidden sm:flex items-center bg-white/10 dark:bg-gray-800/60 rounded-lg px-3 py-1.5 border border-white/20 text-sm focus-within:ring-2 focus-within:ring-lightblue">
+                    <i class="fa-solid fa-magnifying-glass text-lightblue-200 mr-2"></i>
+                    <input type="text" id="global-search" placeholder="Search clients, ID..." class="bg-transparent border-none text-white placeholder-lightblue-200/70 focus:outline-none text-xs w-36 lg:w-48">
+                </div>
+
+                <!-- Notifications -->
+                <div class="relative">
+                    <button id="btn-notifications" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 relative transition text-white">
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="unread-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
+                    </button>
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button id="dark-mode-toggle" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-white" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline text-yellow-300"></i>
+                </button>
+
+                <!-- User Profile / Auth Toggle -->
+                <div class="pl-2 border-l border-white/20 flex items-center gap-2">
+                    <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-lightblue">
+                    <div class="hidden lg:block text-left text-xs">
+                        <p id="user-name-display" class="font-semibold leading-none">Admin Staff</p>
+                        <p id="user-role-display" class="text-[10px] text-lightblue-200">Bureau Officer</p>
+                    </div>
+                    <button id="btn-login-modal" class="ml-1 text-xs bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-md font-medium transition">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i> Switch Auth
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside id="sidebar" class="bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 w-64 flex-none fixed md:static inset-y-0 left-0 z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between custom-scrollbar overflow-y-auto">
+            <div class="p-4 space-y-1">
+                <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Main Navigation</div>
+                
+                <button data-target="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-chart-pie text-deepblue dark:text-lightblue w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </button>
+
+                <button data-target="registration" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-user-plus text-deepblue dark:text-lightblue w-5 text-center"></i>
+                    <span>Client Registration</span>
+                </button>
+
+                <button data-target="directory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-users text-deepblue dark:text-lightblue w-5 text-center"></i>
+                    <span>Client Directory</span>
+                </button>
+
+                <button data-target="matchmaker" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-wand-magic-sparkles text-deepblue dark:text-lightblue w-5 text-center"></i>
+                    <span>Matchmaking Engine</span>
+                </button>
+
+                <button data-target="inquiries" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition flex justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-heart-circle-check text-deepblue dark:text-lightblue w-5 text-center"></i>
+                        <span>Inquiries & Interests</span>
+                    </div>
+                    <span id="sidebar-inquiry-badge" class="bg-deepblue-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">4</span>
+                </button>
+
+                <button data-target="messaging" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-comments text-deepblue dark:text-lightblue w-5 text-center"></i>
+                    <span>Internal Messaging</span>
+                </button>
+
+                <div class="pt-4 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Showcase & Analytics</div>
+
+                <button data-target="stories" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-gem text-deepblue dark:text-lightblue w-5 text-center"></i>
+                    <span>Success Stories</span>
+                </button>
+
+                <button data-target="reports" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-lightblue-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-chart-line text-deepblue dark:text-lightblue w-5 text-center"></i>
+                    <span>Reports & Analytics</span>
+                </button>
+            </div>
+
+            <!-- Sidebar Footer Status Box -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                    <div class="text-xs">
+                        <p class="font-medium text-gray-700 dark:text-gray-300">Bureau Engine Online</p>
+                        <p class="text-gray-400 text-[11px]">System v2.4 Active</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT VIEW AREA -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
+            <div class="max-w-7xl mx-auto space-y-6">
+
+                <!-- VIEW 1: DASHBOARD -->
+                <section id="view-dashboard" class="content-view space-y-6">
+                    <!-- Banner -->
+                    <div class="bg-gradient-to-r from-deepblue-600 via-deepblue-700 to-deepblue-800 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                        <div class="relative z-10 max-w-2xl">
+                            <h2 class="text-2xl md:text-3xl font-bold mb-2">Welcome to Matrimonial Management Bureau</h2>
+                            <p class="text-lightblue-100 text-sm md:text-base mb-4">Empowering smooth matchmaking, automated client compatibility scores, and dedicated interest management.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <button onclick="switchView('registration')" class="bg-white text-deepblue-700 font-semibold px-4 py-2 rounded-lg text-sm shadow hover:bg-lightblue-50 transition flex items-center gap-2">
+                                    <i class="fa-solid fa-user-plus"></i> Register New Client
+                                </button>
+                                <button onclick="switchView('matchmaker')" class="bg-deepblue-500 hover:bg-deepblue-600 border border-white/20 text-white font-semibold px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Launch Matchmaker
+                                </button>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-heart text-white/5 text-9xl absolute -bottom-6 -right-6 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Metrics Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-gray-400 uppercase">Total Clients</p>
+                                <h3 id="stat-total-clients" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                                <p class="text-xs text-green-600 mt-1"><i class="fa-solid fa-arrow-up"></i> +12% this month</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-lightblue-200 dark:bg-deepblue-800 text-deepblue dark:text-lightblue flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-gray-400 uppercase">Active Matches</p>
+                                <h3 id="stat-active-matches" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                                <p class="text-xs text-blue-600 mt-1"><i class="fa-solid fa-heart"></i> High Compatibility</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-300 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-handshake font-bold"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-gray-400 uppercase">Inquiries & Interests</p>
+                                <h3 id="stat-inquiries" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                                <p class="text-xs text-amber-600 mt-1"><i class="fa-solid fa-clock"></i> Pending Review</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-envelope-open-text"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-gray-400 uppercase">Success Stories</p>
+                                <h3 id="stat-success-stories" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                                <p class="text-xs text-purple-600 mt-1"><i class="fa-solid fa-ring"></i> Facilitated Marriages</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-ring"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity & Quick Directory Preview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Recent Clients Quick View -->
+                        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-gray-800 dark:text-white text-base">Recently Registered Profiles</h3>
+                                <button onclick="switchView('directory')" class="text-xs text-deepblue-600 dark:text-lightblue hover:underline font-semibold">View All</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs uppercase">
+                                        <tr>
+                                            <th class="px-4 py-3 rounded-l-lg">Client</th>
+                                            <th class="px-4 py-3">Gender / Age</th>
+                                            <th class="px-4 py-3">Religion & Caste</th>
+                                            <th class="px-4 py-3">Status</th>
+                                            <th class="px-4 py-3 rounded-r-lg text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboard-recent-table" class="divide-y divide-gray-100 dark:divide-gray-700">
+                                        <!-- JS populates -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Inquiry Overview Widget -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-bold text-gray-800 dark:text-white text-base">Latest Interest Expressed</h3>
+                                    <span class="text-xs bg-lightblue text-deepblue-800 px-2 py-0.5 rounded font-medium">Live</span>
+                                </div>
+                                <div id="dashboard-inquiry-list" class="space-y-3">
+                                    <!-- JS Populates -->
+                                </div>
+                            </div>
+                            <button onclick="switchView('inquiries')" class="w-full mt-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-xs font-semibold py-2 rounded-lg text-gray-700 dark:text-gray-200 transition">
+                                Manage All Inquiries
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- VIEW 2: MULTI-STEP CLIENT REGISTRATION -->
+                <section id="view-registration" class="content-view hidden space-y-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="border-b border-gray-100 dark:border-gray-700 pb-4 mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-id-card text-deepblue dark:text-lightblue"></i> Multi-Step Client Profile Registration
+                            </h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Complete all 4 required sections to insert client into database.</p>
+                        </div>
+
+                        <!-- Stepper Indicator Header -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-8">
+                            <div id="step-tab-1" class="step-tab flex items-center gap-2 p-3 rounded-lg bg-deepblue-600 text-white font-medium text-xs">
+                                <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold">1</span>
+                                <span>Personal Info</span>
+                            </div>
+                            <div id="step-tab-2" class="step-tab flex items-center gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-medium text-xs">
+                                <span class="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center font-bold">2</span>
+                                <span>Family Details</span>
+                            </div>
+                            <div id="step-tab-3" class="step-tab flex items-center gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-medium text-xs">
+                                <span class="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center font-bold">3</span>
+                                <span>Education & Career</span>
+                            </div>
+                            <div id="step-tab-4" class="step-tab flex items-center gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-medium text-xs">
+                                <span class="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center font-bold">4</span>
+                                <span>Partner Preferences</span>
+                            </div>
+                        </div>
+
+                        <!-- Form Container -->
+                        <form id="client-registration-form" onsubmit="event.preventDefault(); handleRegistrationSubmit();">
+                            
+                            <!-- STEP 1: Personal Information -->
+                            <div id="step-form-1" class="step-form space-y-4">
+                                <h3 class="font-semibold text-deepblue-600 dark:text-lightblue text-sm border-b pb-2 dark:border-gray-700">
+                                    <i class="fa-solid fa-user mr-1"></i> Personal Information
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name *</label>
+                                        <input type="text" id="reg-fullName" required placeholder="e.g. Rahul Sharma" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-deepblue-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Gender *</label>
+                                        <select id="reg-gender" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-deepblue-600">
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth *</label>
+                                        <input type="date" id="reg-dob" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-deepblue-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Marital Status *</label>
+                                        <select id="reg-maritalStatus" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-deepblue-600">
+                                            <option value="Never Married">Never Married</option>
+                                            <option value="Divorced">Divorced</option>
+                                            <option value="Widowed">Widowed</option>
+                                            <option value="Awaiting Divorce">Awaiting Divorce</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Religion & Caste *</label>
+                                        <input type="text" id="reg-religionCaste" required placeholder="e.g. Hindu - Brahmin" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-deepblue-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Mother Tongue *</label>
+                                        <input type="text" id="reg-motherTongue" required placeholder="e.g. Hindi, English, Gujarati" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-deepblue-600">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Photo Image URL</label>
+                                        <input type="url" id="reg-photo" placeholder="https://images.unsplash.com/photo-..." class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-deepblue-600">
+                                        <p class="text-[10px] text-gray-400 mt-1">Optional. Leave empty for auto placeholder photo.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 2: Family Details -->
+                            <div id="step-form-2" class="step-form space-y-4 hidden">
+                                <h3 class="font-semibold text-deepblue-600 dark:text-lightblue text-sm border-b pb-2 dark:border-gray-700">
+                                    <i class="fa-solid fa-house-chimney mr-1"></i> Family Details
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Family Type *</label>
+                                        <select id="reg-familyType" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <option value="Nuclear Family">Nuclear Family</option>
+                                            <option value="Joint Family">Joint Family</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Family Values *</label>
+                                        <select id="reg-familyValues" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <option value="Traditional">Traditional</option>
+                                            <option value="Moderate">Moderate</option>
+                                            <option value="Liberal">Liberal</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Father's Occupation *</label>
+                                        <input type="text" id="reg-fatherOccupation" required placeholder="e.g. Businessman / Retired Engineer" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Mother's Occupation *</label>
+                                        <input type="text" id="reg-motherOccupation" required placeholder="e.g. Homemaker / School Teacher" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Number of Siblings *</label>
+                                        <input type="number" id="reg-siblings" min="0" max="10" required value="1" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 3: Education & Career -->
+                            <div id="step-form-3" class="step-form space-y-4 hidden">
+                                <h3 class="font-semibold text-deepblue-600 dark:text-lightblue text-sm border-b pb-2 dark:border-gray-700">
+                                    <i class="fa-solid fa-graduation-cap mr-1"></i> Education & Career
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Education Level *</label>
+                                        <select id="reg-education" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <option value="Bachelors (B.Tech / B.E / B.Sc)">Bachelors (B.Tech / B.E / B.Sc)</option>
+                                            <option value="Masters (M.Tech / MBA / M.Sc)">Masters (M.Tech / MBA / M.Sc)</option>
+                                            <option value="Doctorate / PhD">Doctorate / PhD</option>
+                                            <option value="Diploma / High School">Diploma / High School</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Occupation *</label>
+                                        <input type="text" id="reg-occupation" required placeholder="e.g. Software Engineer / Financial Analyst" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Annual Income ($ / ₹) *</label>
+                                        <input type="text" id="reg-income" required placeholder="e.g. $95,000 / yr" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Working Location *</label>
+                                        <input type="text" id="reg-location" required placeholder="e.g. New York, USA / Mumbai, India" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 4: Partner Preferences -->
+                            <div id="step-form-4" class="step-form space-y-4 hidden">
+                                <h3 class="font-semibold text-deepblue-600 dark:text-lightblue text-sm border-b pb-2 dark:border-gray-700">
+                                    <i class="fa-solid fa-heart mr-1"></i> Partner Preferences
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Preferred Age Range *</label>
+                                        <div class="flex gap-2 items-center">
+                                            <input type="number" id="reg-prefAgeMin" min="18" max="70" value="23" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <span class="text-xs text-gray-400">to</span>
+                                            <input type="number" id="reg-prefAgeMax" min="18" max="70" value="30" required class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Preferred Religion *</label>
+                                        <input type="text" id="reg-prefReligion" required placeholder="e.g. Hindu / Any" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Preferred Caste *</label>
+                                        <input type="text" id="reg-prefCaste" required placeholder="e.g. Brahmin / Open to All" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Preferred Education *</label>
+                                        <input type="text" id="reg-prefEducation" required placeholder="e.g. Masters or Above" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Preferred Occupation *</label>
+                                        <input type="text" id="reg-prefOccupation" required placeholder="e.g. Corporate / IT / Business" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Preferred Location *</label>
+                                        <input type="text" id="reg-prefLocation" required placeholder="e.g. Metro Cities / Abroad" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Buttons Bar -->
+                            <div class="flex justify-between items-center mt-8 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                <button type="button" id="btn-prev-step" class="hidden bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-700 dark:text-gray-200 px-5 py-2.5 rounded-lg text-xs font-semibold transition">
+                                    <i class="fa-solid fa-arrow-left mr-1"></i> Previous Step
+                                </button>
+                                <div></div>
+                                <button type="button" id="btn-next-step" class="bg-deepblue-600 hover:bg-deepblue-700 text-white px-6 py-2.5 rounded-lg text-xs font-semibold shadow transition">
+                                    Next Step <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </button>
+                                <button type="submit" id="btn-submit-reg" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg text-xs font-semibold shadow transition">
+                                    <i class="fa-solid fa-check mr-1"></i> Complete Registration
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+
+                <!-- VIEW 3: CLIENT DIRECTORY -->
+                <section id="view-directory" class="content-view hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-users text-deepblue dark:text-lightblue"></i> Registered Client Directory
+                            </h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Search, filter, track status, and view profiles in real-time.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="exportClientsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-file-csv"></i> Export CSV
+                            </button>
+                            <button onclick="switchView('registration')" class="bg-deepblue-600 hover:bg-deepblue-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> Add Client
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter Bar -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Search Keyword</label>
+                            <input type="text" id="dir-search-input" placeholder="Name, occupation, religion..." class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Filter Gender</label>
+                            <select id="dir-filter-gender" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                <option value="All">All Genders</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Filter Status</label>
+                            <select id="dir-filter-status" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                <option value="All">All Statuses</option>
+                                <option value="Active">Active</option>
+                                <option value="Matched">Matched</option>
+                                <option value="Pending">Pending</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button id="btn-reset-filters" class="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-semibold py-2 rounded-lg transition">
+                                Reset Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Directory Grid View -->
+                    <div id="directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- JS renders Client Cards -->
+                    </div>
+                </section>
+
+
+                <!-- VIEW 4: PROFILE DETAIL VIEW -->
+                <section id="view-profile-detail" class="content-view hidden space-y-6">
+                    <button onclick="switchView('directory')" class="text-xs text-deepblue-600 dark:text-lightblue font-semibold hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Directory
+                    </button>
+
+                    <div id="profile-detail-container" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <!-- JS renders full profile details -->
+                    </div>
+                </section>
+
+
+                <!-- VIEW 5: MATCHMAKING ENGINE -->
+                <section id="view-matchmaker" class="content-view hidden space-y-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="border-b border-gray-100 dark:border-gray-700 pb-4 mb-4">
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles text-deepblue dark:text-lightblue"></i> Automated Matchmaking Engine
+                            </h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Select a primary client to run automated matrix compatibility calculations against all active opposite-gender profiles.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Select Primary Client to Match:</label>
+                                <select id="match-client-select" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    <!-- Options populated by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <button id="btn-run-matchmaker" class="w-full bg-deepblue-600 hover:bg-deepblue-700 text-white font-semibold text-xs py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-bolt"></i> Run Compatibility Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Match Results Grid -->
+                    <div>
+                        <h3 class="font-bold text-gray-800 dark:text-white text-base mb-4 flex items-center gap-2">
+                            <span>Top Compatibility Match Suggestions</span>
+                            <span id="match-count-badge" class="text-xs bg-lightblue text-deepblue px-2 py-0.5 rounded-full font-bold">0 Results</span>
+                        </h3>
+
+                        <div id="matchmaker-results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- JS Renders scored matches -->
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- VIEW 6: INQUIRY / INTEREST MANAGEMENT -->
+                <section id="view-inquiries" class="content-view hidden space-y-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700 pb-4 mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-heart-circle-check text-deepblue dark:text-lightblue"></i> Inquiry & Interest Expressions
+                                </h2>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Track and manage client interest sent between profiles.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <select id="inquiry-filter-status" class="text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    <option value="All">All Inquiries</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Accepted">Accepted</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-xs uppercase">
+                                    <tr>
+                                        <th class="px-4 py-3">Inquiry ID</th>
+                                        <th class="px-4 py-3">Sender Profile</th>
+                                        <th class="px-4 py-3">Receiver Profile</th>
+                                        <th class="px-4 py-3">Date Sent</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inquiries-table-body" class="divide-y divide-gray-100 dark:divide-gray-700">
+                                    <!-- JS Populates -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- VIEW 7: INTERNAL MESSAGING SYSTEM -->
+                <section id="view-messaging" class="content-view hidden space-y-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-[600px] flex overflow-hidden">
+                        <!-- Conversations Sidebar -->
+                        <div class="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+                            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="font-bold text-gray-800 dark:text-white text-sm">Internal Messages</h3>
+                                <p class="text-[11px] text-gray-400">Bureau to Client Communication</p>
+                            </div>
+                            <div id="chat-threads-list" class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-gray-100 dark:divide-gray-700">
+                                <!-- JS Populates Chat Threads -->
+                            </div>
+                        </div>
+
+                        <!-- Active Chat Box -->
+                        <div class="flex-1 flex flex-col bg-gray-50/50 dark:bg-gray-900/50">
+                            <!-- Chat Header -->
+                            <div id="chat-header" class="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <img id="chat-active-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" class="w-10 h-10 rounded-full object-cover">
+                                    <div>
+                                        <h4 id="chat-active-name" class="font-semibold text-sm text-gray-800 dark:text-white">Select a client thread</h4>
+                                        <p id="chat-active-status" class="text-xs text-green-500 font-medium">Online</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chat Messages Scroll Area -->
+                            <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3">
+                                <!-- JS Populates messages -->
+                            </div>
+
+                            <!-- Chat Input Box -->
+                            <div class="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                                <input type="text" id="chat-input-field" placeholder="Type a message..." class="flex-1 text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none">
+                                <button id="btn-send-chat" class="bg-deepblue-600 hover:bg-deepblue-700 text-white p-2.5 rounded-lg text-xs font-semibold px-4 transition">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- VIEW 8: SUCCESS STORIES -->
+                <section id="view-stories" class="content-view hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-gem text-deepblue dark:text-lightblue"></i> Bureau Success Stories
+                            </h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Celebrating happy couples united by Eternal Bond Matrimonial Bureau.</p>
+                        </div>
+                        <button onclick="openAddStoryModal()" class="bg-deepblue-600 hover:bg-deepblue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Add Success Story
+                        </button>
+                    </div>
+
+                    <div id="success-stories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- JS Populates Stories -->
+                    </div>
+                </section>
+
+
+                <!-- VIEW 9: REPORTS & ANALYTICS -->
+                <section id="view-reports" class="content-view hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-deepblue dark:text-lightblue"></i> Bureau Analytics & Demographics
+                            </h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Real-time statistics on registered clients, gender ratios, and match conversions.</p>
+                        </div>
+                        <button onclick="exportClientsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition">
+                            <i class="fa-solid fa-download mr-1"></i> Download Client Report (CSV)
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                            <h3 class="font-bold text-gray-800 dark:text-white text-sm mb-4">Gender Distribution</h3>
+                            <div class="h-64">
+                                <canvas id="chart-gender"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                            <h3 class="font-bold text-gray-800 dark:text-white text-sm mb-4">Client Status Breakdown</h3>
+                            <div class="h-64">
+                                <canvas id="chart-status"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+
+    <!-- MODAL 1: AUTHENTICATION SIMULATION -->
+    <div id="modal-auth" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeModal('modal-auth')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-lightblue-200 dark:bg-deepblue-800 text-deepblue dark:text-lightblue rounded-full mx-auto flex items-center justify-center text-xl mb-2">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Bureau Login / Role Switcher</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Simulate staff vs client authentication access.</p>
+            </div>
+
+            <form onsubmit="event.preventDefault(); switchUserRole();" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Select Access Mode</label>
+                    <select id="auth-role-select" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                        <option value="Staff">Bureau Staff / Admin Officer</option>
+                        <option value="Client">Client Mode (Priya Patel)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Passcode / Access Key</label>
+                    <input type="password" value="demo123" class="w-full text-xs p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" readonly>
+                </div>
+                <button type="submit" class="w-full bg-deepblue-600 hover:bg-deepblue-700 text-white font-semibold py-2.5 rounded-lg text-xs transition shadow">
+                    Authenticate Session
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- MODAL 2: ADD SUCCESS STORY -->
+    <div id="modal-add-story" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeModal('modal-add-story')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-gem text-deepblue dark:text-lightblue"></i> Add New Success Story
+            </h3>
+            <form onsubmit="event.preventDefault(); submitSuccessStory();" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-medium mb-1">Couple Names</label>
+                    <input type="text" id="story-couple" required placeholder="e.g. Vikram & Ananya" class="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Marriage Date</label>
+                    <input type="date" id="story-date" required class="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Photo Image URL</label>
+                    <input type="url" id="story-photo" placeholder="https://images.unsplash.com/..." class="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Testimonial / Story</label>
+                    <textarea id="story-desc" rows="3" required placeholder="Share brief testimonial..." class="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-deepblue-600 hover:bg-deepblue-700 text-white font-semibold py-2.5 rounded-lg transition shadow">
+                    Publish Story
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- APPLICATION LOGIC & JAVASCRIPT -->
+    <script>
+        // ==========================================
+        // IN-MEMORY DATABASE & MOCK DATA
+        // ==========================================
+        let clientsData = [
+            {
+                id: "MB-101",
+                fullName: "Priya Patel",
+                gender: "Female",
+                dob: "1997-04-12",
+                age: 29,
+                maritalStatus: "Never Married",
+                religionCaste: "Hindu - Leva Patel",
+                motherTongue: "Gujarati",
+                familyType: "Nuclear Family",
+                familyValues: "Moderate",
+                fatherOccupation: "Senior Civil Engineer",
+                motherOccupation: "School Principal",
+                siblings: 1,
+                education: "Masters (M.Tech / MBA / M.Sc)",
+                occupation: "Senior Product Designer",
+                income: "$110,000 / yr",
+                location: "San Jose, CA, USA",
+                prefAgeMin: 28,
+                prefAgeMax: 34,
+                prefReligion: "Hindu",
+                prefCaste: "Patel / Open",
+                prefEducation: "Masters or Above",
+                prefOccupation: "Tech / Business / Engineering",
+                prefLocation: "USA / Metro India",
+                photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500",
+                status: "Active",
+                regDate: "2026-01-15"
+            },
+            {
+                id: "MB-102",
+                fullName: "Rohan Varma",
+                gender: "Male",
+                dob: "1994-08-22",
+                age: 32,
+                maritalStatus: "Never Married",
+                religionCaste: "Hindu - Brahmin",
+                motherTongue: "Hindi",
+                familyType: "Joint Family",
+                familyValues: "Traditional",
+                fatherOccupation: "Business Owner",
+                motherOccupation: "Homemaker",
+                siblings: 2,
+                education: "Bachelors (B.Tech / B.E / B.Sc)",
+                occupation: "Software Architect",
+                income: "$135,000 / yr",
+                location: "Seattle, WA, USA",
+                prefAgeMin: 25,
+                prefAgeMax: 30,
+                prefReligion: "Hindu",
+                prefCaste: "Brahmin",
+                prefEducation: "Bachelors or Above",
+                prefOccupation: "IT / Corporate",
+                prefLocation: "USA / Canada",
+                photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500",
+                status: "Active",
+                regDate: "2026-02-01"
+            },
+            {
+                id: "MB-103",
+                fullName: "Aanya Sen",
+                gender: "Female",
+                dob: "1996-11-05",
+                age: 30,
+                maritalStatus: "Never Married",
+                religionCaste: "Hindu - Kayastha",
+                motherTongue: "Bengali",
+                familyType: "Nuclear Family",
+                familyValues: "Liberal",
+                fatherOccupation: "Retired Doctor",
+                motherOccupation: "Professor",
+                siblings: 0,
+                education: "Doctorate / PhD",
+                occupation: "Biotech Scientist",
+                income: "$105,000 / yr",
+                location: "Boston, MA, USA",
+                prefAgeMin: 29,
+                prefAgeMax: 35,
+                prefReligion: "Hindu",
+                prefCaste: "Open to All",
+                prefEducation: "Doctorate / Masters",
+                prefOccupation: "Science / Research / Tech",
+                prefLocation: "USA",
+                photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500",
+                status: "Matched",
+                regDate: "2025-11-20"
+            },
+            {
+                id: "MB-104",
+                fullName: "Karan Mehta",
+                gender: "Male",
+                dob: "1995-02-18",
+                age: 31,
+                maritalStatus: "Never Married",
+                religionCaste: "Jain - Shwetambar",
+                motherTongue: "Gujarati",
+                familyType: "Joint Family",
+                familyValues: "Moderate",
+                fatherOccupation: "Textile Businessman",
+                motherOccupation: "Homemaker",
+                siblings: 1,
+                education: "Masters (M.Tech / MBA / M.Sc)",
+                occupation: "Investment Banker",
+                income: "$160,000 / yr",
+                location: "New York, NY, USA",
+                prefAgeMin: 26,
+                prefAgeMax: 31,
+                prefReligion: "Jain / Hindu",
+                prefCaste: "Jain / Open",
+                prefEducation: "Bachelors / Masters",
+                prefOccupation: "Finance / Management / IT",
+                prefLocation: "New York / East Coast",
+                photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500",
+                status: "Active",
+                regDate: "2026-03-10"
+            },
+            {
+                id: "MB-105",
+                fullName: "Siddharth Rao",
+                gender: "Male",
+                dob: "1993-06-30",
+                age: 33,
+                maritalStatus: "Divorced",
+                religionCaste: "Hindu - Kamma",
+                motherTongue: "Telugu",
+                familyType: "Nuclear Family",
+                familyValues: "Moderate",
+                fatherOccupation: "Advocate",
+                motherOccupation: "Bank Officer",
+                siblings: 1,
+                education: "Bachelors (B.Tech / B.E / B.Sc)",
+                occupation: "Cloud Solutions Architect",
+                income: "$140,000 / yr",
+                location: "Dallas, TX, USA",
+                prefAgeMin: 27,
+                prefAgeMax: 33,
+                prefReligion: "Hindu",
+                prefCaste: "Open to All",
+                prefEducation: "Bachelors or Masters",
+                prefOccupation: "Any Professional",
+                prefLocation: "USA",
+                photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=500",
+                status: "Pending",
+                regDate: "2026-04-02"
+            }
+        ];
+
+        let inquiriesData = [
+            { id: "INQ-501", senderId: "MB-102", senderName: "Rohan Varma", receiverId: "MB-101", receiverName: "Priya Patel", date: "2026-10-24", status: "Pending" },
+            { id: "INQ-502", senderId: "MB-104", senderName: "Karan Mehta", receiverId: "MB-101", receiverName: "Priya Patel", date: "2026-10-20", status: "Accepted" },
+            { id: "INQ-503", senderId: "MB-101", senderName: "Priya Patel", receiverId: "MB-105", receiverName: "Siddharth Rao", date: "2026-10-18", status: "Rejected" },
+            { id: "INQ-504", senderId: "MB-102", senderName: "Rohan Varma", receiverId: "MB-103", receiverName: "Aanya Sen", date: "2026-10-15", status: "Accepted" }
+        ];
+
+        let successStoriesData = [
+            {
+                id: 1,
+                couple: "Aditya & Sunita",
+                date: "November 2025",
+                photo: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=500",
+                desc: "We found our soulmates through Eternal Bond Bureau. The compatibility matching was spot on!"
+            },
+            {
+                id: 2,
+                couple: "Manish & Sneha",
+                date: "January 2026",
+                photo: "https://images.unsplash.com/photo-1519741497674-611481863552?w=500",
+                desc: "Thank you to the bureau team for facilitating smooth family discussions and helping us connect!"
+            }
+        ];
+
+        let messagesData = [
+            { id: 1, clientId: "MB-101", sender: "client", text: "Hello Bureau team, can you share the profile details of Karan Mehta?", time: "10:15 AM" },
+            { id: 2, clientId: "MB-101", sender: "bureau", text: "Sure Priya! His interest was accepted. You can view his complete partner preferences now.", time: "10:18 AM" }
+        ];
+
+        let activeChatClientId = "MB-101";
+        let currentRegStep = 1;
+
+        // ==========================================
+        // DOM LOAD & INITIALIZATION
+        // ==========================================
+        window.onload = function() {
+            initNavigation();
+            initRegistrationStepper();
+            renderDashboard();
+            renderDirectory();
+            renderMatchmakerDropdown();
+            renderInquiries();
+            renderMessaging();
+            renderSuccessStories();
+            initCharts();
+            initDarkMode();
+        };
+
+        // ==========================================
+        // NAVIGATION & TAB SWITCHING
+        // ==========================================
+        function initNavigation() {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-target');
+                    switchView(target);
+                });
+            });
+
+            // Mobile sidebar toggle
+            document.getElementById('mobile-sidebar-toggle').addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('-translate-x-full');
+            });
+
+            // Auth modal button
+            document.getElementById('btn-login-modal').addEventListener('click', () => {
+                document.getElementById('modal-auth').classList.remove('hidden');
+            });
+        }
+
+        function switchView(targetId) {
+            // Hide all views
+            document.querySelectorAll('.content-view').forEach(view => view.classList.add('hidden'));
+
+            // Show target view
+            const targetView = document.getElementById(`view-${targetId}`);
+            if (targetView) targetView.classList.remove('hidden');
+
+            // Update sidebar nav styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-target') === targetId) {
+                    btn.classList.add('bg-lightblue-200', 'dark:bg-gray-700', 'font-bold', 'text-deepblue-700', 'dark:text-white');
+                } else {
+                    btn.classList.remove('bg-lightblue-200', 'dark:bg-gray-700', 'font-bold', 'text-deepblue-700', 'dark:text-white');
+                }
+            });
+
+            // Specific refresh triggers
+            if (targetId === 'dashboard') renderDashboard();
+            if (targetId === 'directory') renderDirectory();
+            if (targetId === 'matchmaker') renderMatchmakerDropdown();
+            if (targetId === 'inquiries') renderInquiries();
+            if (targetId === 'reports') updateCharts();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // ==========================================
+        // DASHBOARD MODULE
+        // ==========================================
+        function renderDashboard() {
+            // Stats
+            document.getElementById('stat-total-clients').textContent = clientsData.length;
+            const activeMatches = clientsData.filter(c => c.status === 'Matched').length + 4; // realistic count
+            document.getElementById('stat-active-matches').textContent = activeMatches;
+            document.getElementById('stat-inquiries').textContent = inquiriesData.filter(i => i.status === 'Pending').length;
+            document.getElementById('stat-success-stories').textContent = successStoriesData.length;
+
+            // Recent Table
+            const recentTbody = document.getElementById('dashboard-recent-table');
+            recentTbody.innerHTML = '';
+            
+            clientsData.slice(0, 4).forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/30 transition';
+                tr.innerHTML = `
+                    <td class="px-4 py-3 flex items-center gap-3">
+                        <img src="${c.photo}" class="w-8 h-8 rounded-full object-cover">
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-gray-100 text-xs">${c.fullName}</p>
+                            <p class="text-[10px] text-gray-400">${c.id}</p>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">${c.gender}, ${c.age} yrs</td>
+                    <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">${c.religionCaste}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-0.5 text-[10px] rounded-full font-semibold ${
+                            c.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
+                            c.status === 'Matched' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
+                            'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                        }">${c.status}</span>
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <button onclick="viewProfileDetail('${c.id}')" class="text-xs text-deepblue-600 dark:text-lightblue font-semibold hover:underline">View Profile</button>
+                    </td>
+                `;
+                recentTbody.appendChild(tr);
+            });
+
+            // Inquiry Widget
+            const inqContainer = document.getElementById('dashboard-inquiry-list');
+            inqContainer.innerHTML = '';
+            inquiriesData.slice(0, 3).forEach(inq => {
+                const div = document.createElement('div');
+                div.className = 'p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg text-xs flex items-center justify-between';
+                div.innerHTML = `
+                    <div>
+                        <p class="font-medium text-gray-800 dark:text-gray-200"><strong>${inq.senderName}</strong> &rarr; <strong>${inq.receiverName}</strong></p>
+                        <p class="text-[10px] text-gray-400 mt-0.5">${inq.date}</p>
+                    </div>
+                    <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${
+                        inq.status === 'Accepted' ? 'bg-green-100 text-green-700' :
+                        inq.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                    }">${inq.status}</span>
+                `;
+                inqContainer.appendChild(div);
+            });
+        }
+
+        // ==========================================
+        // CLIENT REGISTRATION MODULE (MULTI-STEP)
+        // ==========================================
+        function initRegistrationStepper() {
+            const nextBtn = document.getElementById('btn-next-step');
+            const prevBtn = document.getElementById('btn-prev-step');
+            const submitBtn = document.getElementById('btn-submit-reg');
+
+            nextBtn.addEventListener('click', () => {
+                if (currentRegStep < 4) {
+                    currentRegStep++;
+                    updateStepperUI();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentRegStep > 1) {
+                    currentRegStep--;
+                    updateStepperUI();
+                }
+            });
+        }
+
+        function updateStepperUI() {
+            // Hide all steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step-form-${i}`).classList.add('hidden');
+                const tab = document.getElementById(`step-tab-${i}`);
+                if (i === currentRegStep) {
+                    tab.className = 'step-tab flex items-center gap-2 p-3 rounded-lg bg-deepblue-600 text-white font-medium text-xs shadow-md';
+                } else {
+                    tab.className = 'step-tab flex items-center gap-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-medium text-xs';
+                }
+            }
+
+            // Show current step form
+            document.getElementById(`step-form-${currentRegStep}`).classList.remove('hidden');
+
+            // Buttons visibility
+            const nextBtn = document.getElementById('btn-next-step');
+            const prevBtn = document.getElementById('btn-prev-step');
+            const submitBtn = document.getElementById('btn-submit-reg');
+
+            if (currentRegStep === 1) prevBtn.classList.add('hidden');
+            else prevBtn.classList.remove('hidden');
+
+            if (currentRegStep === 4) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+        }
+
+        function handleRegistrationSubmit() {
+            const fullName = document.getElementById('reg-fullName').value;
+            const gender = document.getElementById('reg-gender').value;
+            const dob = document.getElementById('reg-dob').value;
+            
+            // Calculate age
+            const birthYear = new Date(dob).getFullYear() || 1996;
+            const age = 2026 - birthYear;
+
+            const photoUrl = document.getElementById('reg-photo').value.trim() || 
+                (gender === 'Male' ? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500' : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500');
+
+            const newClient = {
+                id: `MB-${101 + clientsData.length}`,
+                fullName: fullName,
+                gender: gender,
+                dob: dob,
+                age: age,
+                maritalStatus: document.getElementById('reg-maritalStatus').value,
+                religionCaste: document.getElementById('reg-religionCaste').value,
+                motherTongue: document.getElementById('reg-motherTongue').value,
+                familyType: document.getElementById('reg-familyType').value,
+                familyValues: document.getElementById('reg-familyValues').value,
+                fatherOccupation: document.getElementById('reg-fatherOccupation').value,
+                motherOccupation: document.getElementById('reg-motherOccupation').value,
+                siblings: parseInt(document.getElementById('reg-siblings').value) || 0,
+                education: document.getElementById('reg-education').value,
+                occupation: document.getElementById('reg-occupation').value,
+                income: document.getElementById('reg-income').value,
+                location: document.getElementById('reg-location').value,
+                prefAgeMin: parseInt(document.getElementById('reg-prefAgeMin').value) || 22,
+                prefAgeMax: parseInt(document.getElementById('reg-prefAgeMax').value) || 35,
+                prefReligion: document.getElementById('reg-prefReligion').value,
+                prefCaste: document.getElementById('reg-prefCaste').value,
+                prefEducation: document.getElementById('reg-prefEducation').value,
+                prefOccupation: document.getElementById('reg-prefOccupation').value,
+                prefLocation: document.getElementById('reg-prefLocation').value,
+                photo: photoUrl,
+                status: "Active",
+                regDate: new Date().toISOString().split('T')[0]
+            };
+
+            clientsData.unshift(newClient);
+
+            // Reset Form & Stepper
+            document.getElementById('client-registration-form').reset();
+            currentRegStep = 1;
+            updateStepperUI();
+
+            // Notify & Switch
+            alert(`Success! Profile for ${newClient.fullName} (${newClient.id}) has been created.`);
+            switchView('directory');
+        }
+
+        // ==========================================
+        // CLIENT DIRECTORY MODULE
+        // ==========================================
+        function renderDirectory() {
+            const grid = document.getElementById('directory-grid');
+            grid.innerHTML = '';
+
+            const searchTerm = document.getElementById('dir-search-input')?.value.toLowerCase() || '';
+            const genderFilter = document.getElementById('dir-filter-gender')?.value || 'All';
+            const statusFilter = document.getElementById('dir-filter-status')?.value || 'All';
+
+            const filtered = clientsData.filter(c => {
+                const matchesSearch = c.fullName.toLowerCase().includes(searchTerm) || 
+                                      c.occupation.toLowerCase().includes(searchTerm) || 
+                                      c.religionCaste.toLowerCase().includes(searchTerm) ||
+                                      c.id.toLowerCase().includes(searchTerm);
+                const matchesGender = genderFilter === 'All' || c.gender === genderFilter;
+                const matchesStatus = statusFilter === 'All' || c.status === statusFilter;
+                return matchesSearch && matchesGender && matchesStatus;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white dark:bg-gray-800 p-8 rounded-xl text-center text-gray-400">
+                        <i class="fa-solid fa-user-slash text-4xl mb-2"></i>
+                        <p class="text-sm font-medium">No client profiles match your filter criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="relative h-44 bg-gray-100 dark:bg-gray-700">
+                            <img src="${c.photo}" alt="${c.fullName}" class="w-full h-full object-cover">
+                            <span class="absolute top-3 right-3 px-2.5 py-1 text-[10px] rounded-full font-bold shadow ${
+                                c.status === 'Active' ? 'bg-green-500 text-white' :
+                                c.status === 'Matched' ? 'bg-purple-600 text-white' : 'bg-amber-500 text-white'
+                            }">${c.status}</span>
+                            <span class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[11px] px-2 py-0.5 rounded font-mono">${c.id}</span>
+                        </div>
+                        <div class="p-4 space-y-2 text-xs">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-gray-800 dark:text-white text-base leading-tight">${c.fullName}</h3>
+                                <span class="font-semibold text-deepblue-600 dark:text-lightblue">${c.age} yrs</span>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400 font-medium"><i class="fa-solid fa-briefcase text-deepblue/60 mr-1"></i> ${c.occupation}</p>
+                            <p class="text-gray-500 dark:text-gray-400"><i class="fa-solid fa-place-of-worship text-deepblue/60 mr-1"></i> ${c.religionCaste}</p>
+                            <p class="text-gray-500 dark:text-gray-400"><i class="fa-solid fa-location-dot text-deepblue/60 mr-1"></i> ${c.location}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 flex gap-2">
+                        <button onclick="viewProfileDetail('${c.id}')" class="flex-1 bg-lightblue-200 dark:bg-gray-700 hover:bg-lightblue-300 text-deepblue-800 dark:text-gray-200 font-semibold py-2 rounded-lg text-xs transition">
+                            <i class="fa-solid fa-eye mr-1"></i> Full Profile
+                        </button>
+                        <button onclick="sendInterestDirect('${c.id}')" class="bg-deepblue-600 hover:bg-deepblue-700 text-white p-2 rounded-lg text-xs transition" title="Express Interest">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Attach Filter Listeners
+        document.getElementById('dir-search-input')?.addEventListener('input', renderDirectory);
+        document.getElementById('dir-filter-gender')?.addEventListener('change', renderDirectory);
+        document.getElementById('dir-filter-status')?.addEventListener('change', renderDirectory);
+        document.getElementById('btn-reset-filters')?.addEventListener('click', () => {
+            document.getElementById('dir-search-input').value = '';
+            document.getElementById('dir-filter-gender').value = 'All';
+            document.getElementById('dir-filter-status').value = 'All';
+            renderDirectory();
+        });
+
+        // ==========================================
+        // PROFILE DETAIL MODULE
+        // ==========================================
+        function viewProfileDetail(clientId) {
+            const client = clientsData.find(c => c.id === clientId);
+            if (!client) return;
+
+            const container = document.getElementById('profile-detail-container');
+            container.innerHTML = `
+                <div class="bg-gradient-to-r from-deepblue-700 to-deepblue-900 p-6 text-white flex flex-col md:flex-row items-center gap-6">
+                    <img src="${client.photo}" class="w-32 h-32 md:w-40 md:h-40 rounded-2xl object-cover border-4 border-white/20 shadow-xl">
+                    <div class="space-y-2 text-center md:text-left flex-1">
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                            <h2 class="text-2xl font-bold">${client.fullName}</h2>
+                            <span class="bg-white/20 text-xs px-2.5 py-0.5 rounded-full font-mono">${client.id}</span>
+                            <span class="bg-green-500 text-xs text-white px-2.5 py-0.5 rounded-full font-semibold">${client.status}</span>
+                        </div>
+                        <p class="text-lightblue-200 text-sm font-medium">${client.occupation} | ${client.location}</p>
+                        <div class="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-lightblue-100 pt-2">
+                            <span><i class="fa-solid fa-venus-mars mr-1"></i> ${client.gender}, ${client.age} Yrs</span>
+                            <span><i class="fa-solid fa-ring mr-1"></i> ${client.maritalStatus}</span>
+                            <span><i class="fa-solid fa-language mr-1"></i> ${client.motherTongue}</span>
+                            <span><i class="fa-solid fa-sack-dollar mr-1"></i> ${client.income}</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 w-full md:w-auto">
+                        <button onclick="sendInterestDirect('${client.id}')" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-heart"></i> Express Interest
+                        </button>
+                        <button onclick="openChatWith('${client.id}')" class="bg-white text-deepblue-800 hover:bg-lightblue-100 px-4 py-2.5 rounded-xl font-semibold text-xs shadow flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-comments"></i> Send Message
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Personal Info Card -->
+                    <div class="bg-gray-50 dark:bg-gray-700/40 p-4 rounded-xl space-y-3">
+                        <h4 class="font-bold text-deepblue-600 dark:text-lightblue text-xs uppercase tracking-wider border-b pb-1 dark:border-gray-600">
+                            <i class="fa-solid fa-user mr-1"></i> Personal Info
+                        </h4>
+                        <div class="text-xs space-y-2 text-gray-700 dark:text-gray-300">
+                            <p><strong>DOB:</strong> ${client.dob}</p>
+                            <p><strong>Religion/Caste:</strong> ${client.religionCaste}</p>
+                            <p><strong>Mother Tongue:</strong> ${client.motherTongue}</p>
+                            <p><strong>Marital Status:</strong> ${client.maritalStatus}</p>
+                        </div>
+                    </div>
+
+                    <!-- Family Details Card -->
+                    <div class="bg-gray-50 dark:bg-gray-700/40 p-4 rounded-xl space-y-3">
+                        <h4 class="font-bold text-deepblue-600 dark:text-lightblue text-xs uppercase tracking-wider border-b pb-1 dark:border-gray-600">
+                            <i class="fa-solid fa-house-chimney mr-1"></i> Family Details
+                        </h4>
+                        <div class="text-xs space-y-2 text-gray-700 dark:text-gray-300">
+                            <p><strong>Family Type:</strong> ${client.familyType}</p>
+                            <p><strong>Family Values:</strong> ${client.familyValues}</p>
+                            <p><strong>Father:</strong> ${client.fatherOccupation}</p>
+                            <p><strong>Mother:</strong> ${client.motherOccupation}</p>
+                            <p><strong>Siblings:</strong> ${client.siblings}</p>
+                        </div>
+                    </div>
+
+                    <!-- Education & Career -->
+                    <div class="bg-gray-50 dark:bg-gray-700/40 p-4 rounded-xl space-y-3">
+                        <h4 class="font-bold text-deepblue-600 dark:text-lightblue text-xs uppercase tracking-wider border-b pb-1 dark:border-gray-600">
+                            <i class="fa-solid fa-graduation-cap mr-1"></i> Education & Career
+                        </h4>
+                        <div class="text-xs space-y-2 text-gray-700 dark:text-gray-300">
+                            <p><strong>Education:</strong> ${client.education}</p>
+                            <p><strong>Occupation:</strong> ${client.occupation}</p>
+                            <p><strong>Annual Income:</strong> ${client.income}</p>
+                            <p><strong>Location:</strong> ${client.location}</p>
+                        </div>
+                    </div>
+
+                    <!-- Partner Preferences -->
+                    <div class="bg-gray-50 dark:bg-gray-700/40 p-4 rounded-xl space-y-3">
+                        <h4 class="font-bold text-deepblue-600 dark:text-lightblue text-xs uppercase tracking-wider border-b pb-1 dark:border-gray-600">
+                            <i class="fa-solid fa-heart mr-1"></i> Desired Partner
+                        </h4>
+                        <div class="text-xs space-y-2 text-gray-700 dark:text-gray-300">
+                            <p><strong>Age Range:</strong> ${client.prefAgeMin} - ${client.prefAgeMax} Yrs</p>
+                            <p><strong>Religion/Caste:</strong> ${client.prefReligion} / ${client.prefCaste}</p>
+                            <p><strong>Education:</strong> ${client.prefEducation}</p>
+                            <p><strong>Occupation:</strong> ${client.prefOccupation}</p>
+                            <p><strong>Location:</strong> ${client.prefLocation}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            switchView('profile-detail');
+        }
+
+        // ==========================================
+        // MATCHMAKING ENGINE MODULE
+        // ==========================================
+        function renderMatchmakerDropdown() {
+            const select = document.getElementById('match-client-select');
+            select.innerHTML = '';
+            clientsData.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.fullName} (${c.gender}, ${c.age} yrs - ${c.religionCaste})`;
+                select.appendChild(opt);
+            });
+        }
+
+        document.getElementById('btn-run-matchmaker')?.addEventListener('click', runMatchmakingCalculation);
+
+        function runMatchmakingCalculation() {
+            const targetId = document.getElementById('match-client-select').value;
+            const primaryClient = clientsData.find(c => c.id === targetId);
+
+            if (!primaryClient) return;
+
+            // Find opposite gender candidates
+            const candidates = clientsData.filter(c => c.gender !== primaryClient.gender);
+
+            // Compute compatibility score matrix
+            const scoredMatches = candidates.map(candidate => {
+                let score = 50; // base score
+
+                // Religion match
+                if (primaryClient.prefReligion.toLowerCase().includes(candidate.religionCaste.split('-')[0].trim().toLowerCase()) ||
+                    primaryClient.prefReligion === 'Any' || candidate.religionCaste.includes(primaryClient.prefReligion)) {
+                    score += 20;
+                }
+
+                // Age preference match
+                if (candidate.age >= primaryClient.prefAgeMin && candidate.age <= primaryClient.prefAgeMax) {
+                    score += 15;
+                }
+
+                // Education / Profession match
+                if (candidate.education.toLowerCase().includes('masters') || candidate.education.toLowerCase().includes('bachelors')) {
+                    score += 10;
+                }
+
+                // Random small compatibility boost factor
+                score += Math.floor(Math.random() * 5);
+
+                if (score > 98) score = 98;
+
+                return {
+                    candidate,
+                    score
+                };
+            }).sort((a, b) => b.score - a.score);
+
+            // Render Results
+            const grid = document.getElementById('matchmaker-results-grid');
+            grid.innerHTML = '';
+
+            document.getElementById('match-count-badge').textContent = `${scoredMatches.length} Matches Analyzed`;
+
+            scoredMatches.forEach(item => {
+                const c = item.candidate;
+                const score = item.score;
+
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-4';
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <img src="${c.photo}" class="w-16 h-16 rounded-2xl object-cover border-2 border-lightblue">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-gray-800 dark:text-white text-base">${c.fullName}</h4>
+                                <span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 font-bold text-xs px-2.5 py-1 rounded-full border border-emerald-300">
+                                    ${score}% Match
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${c.age} Yrs • ${c.religionCaste}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">${c.occupation}</p>
+                        </div>
+                    </div>
+
+                    <!-- Score Bar -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[11px] font-semibold text-gray-500">
+                            <span>Compatibility Match Index</span>
+                            <span class="text-deepblue-600 dark:text-lightblue">${score}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-500 to-emerald-500 h-full rounded-full" style="width: ${score}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 text-xs">
+                        <button onclick="viewProfileDetail('${c.id}')" class="flex-1 bg-lightblue-200 dark:bg-gray-700 text-deepblue-800 dark:text-gray-200 font-semibold py-2 rounded-lg text-center hover:bg-lightblue-300 transition">
+                            View Profile
+                        </button>
+                        <button onclick="sendInterestDirect('${c.id}')" class="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-heart"></i> Connect
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // INQUIRY / INTEREST MANAGEMENT MODULE
+        // ==========================================
+        function renderInquiries() {
+            const tbody = document.getElementById('inquiries-table-body');
+            tbody.innerHTML = '';
+
+            const statusFilter = document.getElementById('inquiry-filter-status')?.value || 'All';
+
+            const filtered = inquiriesData.filter(i => statusFilter === 'All' || i.status === statusFilter);
+
+            filtered.forEach(inq => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/30 text-xs transition';
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-mono font-medium">${inq.id}</td>
+                    <td class="px-4 py-3 font-semibold text-gray-800 dark:text-gray-200">${inq.senderName} (${inq.senderId})</td>
+                    <td class="px-4 py-3 text-gray-600 dark:text-gray-300">${inq.receiverName} (${inq.receiverId})</td>
+                    <td class="px-4 py-3 text-gray-500">${inq.date}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            inq.status === 'Accepted' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
+                            inq.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' :
+                            'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                        }">${inq.status}</span>
+                    </td>
+                    <td class="px-4 py-3 text-right space-x-1">
+                        ${inq.status === 'Pending' ? `
+                            <button onclick="updateInquiryStatus('${inq.id}', 'Accepted')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded text-[11px] font-medium transition">Accept</button>
+                            <button onclick="updateInquiryStatus('${inq.id}', 'Rejected')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-[11px] font-medium transition">Reject</button>
+                        ` : `
+                            <span class="text-gray-400 text-[11px]">Processed</span>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('inquiry-filter-status')?.addEventListener('change', renderInquiries);
+
+        function updateInquiryStatus(inqId, newStatus) {
+            const inq = inquiriesData.find(i => i.id === inqId);
+            if (inq) {
+                inq.status = newStatus;
+                renderInquiries();
+                renderDashboard();
+            }
+        }
+
+        function sendInterestDirect(receiverId) {
+            const receiver = clientsData.find(c => c.id === receiverId);
+            if (!receiver) return;
+
+            const newInquiry = {
+                id: `INQ-${501 + inquiriesData.length}`,
+                senderId: "MB-101",
+                senderName: "Priya Patel",
+                receiverId: receiver.id,
+                receiverName: receiver.fullName,
+                date: new Date().toISOString().split('T')[0],
+                status: "Pending"
+            };
+
+            inquiriesData.unshift(newInquiry);
+            alert(`Interest expression sent to ${receiver.fullName}! Track status in Inquiry Management.`);
+            renderDashboard();
+        }
+
+        // ==========================================
+        // INTERNAL MESSAGING MODULE
+        // ==========================================
+        function renderMessaging() {
+            // Render side threads
+            const threadsList = document.getElementById('chat-threads-list');
+            threadsList.innerHTML = '';
+
+            clientsData.forEach(c => {
+                const isSelected = c.id === activeChatClientId;
+                const div = document.createElement('div');
+                div.className = `p-3 flex items-center gap-3 cursor-pointer transition ${
+                    isSelected ? 'bg-lightblue-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                }`;
+                div.onclick = () => openChatWith(c.id);
+                div.innerHTML = `
+                    <img src="${c.photo}" class="w-10 h-10 rounded-full object-cover">
+                    <div class="flex-1 overflow-hidden">
+                        <div class="flex justify-between items-baseline">
+                            <h5 class="font-semibold text-xs text-gray-800 dark:text-gray-100 truncate">${c.fullName}</h5>
+                            <span class="text-[10px] text-gray-400">10:18 AM</span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">${c.occupation}</p>
+                    </div>
+                `;
+                threadsList.appendChild(div);
+            });
+
+            // Active chat details
+            const activeClient = clientsData.find(c => c.id === activeChatClientId) || clientsData[0];
+            document.getElementById('chat-active-name').textContent = activeClient.fullName;
+            document.getElementById('chat-active-avatar').src = activeClient.photo;
+
+            // Render Messages
+            const messagesContainer = document.getElementById('chat-messages-container');
+            messagesContainer.innerHTML = '';
+
+            const filteredMsgs = messagesData.filter(m => m.clientId === activeClient.id);
+
+            if (filteredMsgs.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="text-center text-gray-400 text-xs my-auto">
+                        <p>No prior message history with ${activeClient.fullName}. Start a conversation below!</p>
+                    </div>
+                `;
+            } else {
+                filteredMsgs.forEach(msg => {
+                    const isBureau = msg.sender === 'bureau';
+                    const div = document.createElement('div');
+                    div.className = `flex ${isBureau ? 'justify-end' : 'justify-start'}`;
+                    div.innerHTML = `
+                        <div class="max-w-[75%] p-3 rounded-2xl text-xs ${
+                            isBureau ? 'bg-deepblue-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-none shadow-sm'
+                        }">
+                            <p>${msg.text}</p>
+                            <p class="text-[9px] ${isBureau ? 'text-lightblue-200' : 'text-gray-400'} text-right mt-1">${msg.time}</p>
+                        </div>
+                    `;
+                    messagesContainer.appendChild(div);
+                });
+            }
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function openChatWith(clientId) {
+            activeChatClientId = clientId;
+            renderMessaging();
+            switchView('messaging');
+        }
+
+        document.getElementById('btn-send-chat')?.addEventListener('click', sendChatMessage);
+        document.getElementById('chat-input-field')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input-field');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messagesData.push({
+                id: messagesData.length + 1,
+                clientId: activeChatClientId,
+                sender: "bureau",
+                text: text,
+                time: timeStr
+            });
+
+            input.value = '';
+            renderMessaging();
+        }
+
+        // ==========================================
+        // SUCCESS STORIES MODULE
+        // ==========================================
+        function renderSuccessStories() {
+            const grid = document.getElementById('success-stories-grid');
+            grid.innerHTML = '';
+
+            successStoriesData.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="h-48 bg-gray-100 dark:bg-gray-700 overflow-hidden relative">
+                            <img src="${story.photo}" class="w-full h-full object-cover">
+                            <div class="absolute bottom-3 left-3 bg-black/60 text-white text-[11px] px-2.5 py-1 rounded-full backdrop-blur-sm">
+                                <i class="fa-solid fa-calendar-heart mr-1"></i> ${story.date}
+                            </div>
+                        </div>
+                        <div class="p-5 space-y-2">
+                            <h3 class="font-bold text-gray-800 dark:text-white text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-rings-wedding text-pink-500"></i> ${story.couple}
+                            </h3>
+                            <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic">"${story.desc}"</p>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openAddStoryModal() {
+            document.getElementById('modal-add-story').classList.remove('hidden');
+        }
+
+        function submitSuccessStory() {
+            const couple = document.getElementById('story-couple').value;
+            const date = document.getElementById('story-date').value;
+            const photo = document.getElementById('story-photo').value.trim() || 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=500';
+            const desc = document.getElementById('story-desc').value;
+
+            successStoriesData.unshift({
+                id: successStoriesData.length + 1,
+                couple: couple,
+                date: date,
+                photo: photo,
+                desc: desc
+            });
+
+            closeModal('modal-add-story');
+            renderSuccessStories();
+            renderDashboard();
+        }
+
+        // ==========================================
+        // REPORTS & ANALYTICS MODULE
+        // ==========================================
+        let genderChartInstance = null;
+        let statusChartInstance = null;
+
+        function initCharts() {
+            const ctxGender = document.getElementById('chart-gender')?.getContext('2d');
+            const ctxStatus = document.getElementById('chart-status')?.getContext('2d');
+
+            if (ctxGender && ctxStatus) {
+                genderChartInstance = new Chart(ctxGender, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Male', 'Female'],
+                        datasets: [{
+                            data: [3, 2],
+                            backgroundColor: ['#1A5276', '#EC4899']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+                statusChartInstance = new Chart(ctxStatus, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Active', 'Matched', 'Pending'],
+                        datasets: [{
+                            label: 'Clients Count',
+                            data: [3, 1, 1],
+                            backgroundColor: ['#10B981', '#8B5CF6', '#F59E0B']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }
+
+        function updateCharts() {
+            if (!genderChartInstance || !statusChartInstance) return;
+
+            const males = clientsData.filter(c => c.gender === 'Male').length;
+            const females = clientsData.filter(c => c.gender === 'Female').length;
+
+            genderChartInstance.data.datasets[0].data = [males, females];
+            genderChartInstance.update();
+
+            const active = clientsData.filter(c => c.status === 'Active').length;
+            const matched = clientsData.filter(c => c.status === 'Matched').length;
+            const pending = clientsData.filter(c => c.status === 'Pending').length;
+
+            statusChartInstance.data.datasets[0].data = [active, matched, pending];
+            statusChartInstance.update();
+        }
+
+        // CSV Export Functionality
+        function exportClientsCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "ID,Full Name,Gender,Age,Marital Status,Religion & Caste,Occupation,Location,Status\n";
+
+            clientsData.forEach(c => {
+                const row = `"${c.id}","${c.fullName}","${c.gender}","${c.age}","${c.maritalStatus}","${c.religionCaste}","${c.occupation}","${c.location}","${c.status}"`;
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Matrimonial_Clients_Export_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ==========================================
+        // AUTHENTICATION & DARK MODE
+        // ==========================================
+        function switchUserRole() {
+            const role = document.getElementById('auth-role-select').value;
+            if (role === 'Staff') {
+                document.getElementById('user-name-display').textContent = 'Admin Staff';
+                document.getElementById('user-role-display').textContent = 'Bureau Officer';
+            } else {
+                document.getElementById('user-name-display').textContent = 'Priya Patel';
+                document.getElementById('user-role-display').textContent = 'Registered Client';
+            }
+            closeModal('modal-auth');
+        }
+
+        function initDarkMode() {
+            const toggleBtn = document.getElementById('dark-mode-toggle');
+            toggleBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+        }
+    </script>
+</body>
+</html>
